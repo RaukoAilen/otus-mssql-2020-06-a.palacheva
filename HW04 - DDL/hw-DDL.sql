@@ -5,8 +5,9 @@
 4. 1-2 индекса на таблицы.
 5. Ќаложите по одному ограничению в каждой таблице на ввод данных.*/
 
---create database Payments
-
+create database Payments
+use Payments
+GO
 --таблица с информацией о пользовател€х
 create table PaymentsUsers
 (UserId INT IDENTITY PRIMARY KEY,
@@ -17,7 +18,7 @@ Adress NVARCHAR(20) NOT NULL)
 --таблица с информацией о карте
 create table Cards
 (CardID INT IDENTITY PRIMARY KEY NOT NULL,
-Number real NOT NULL,
+CardNumber real NOT NULL,
 CardUser INT FOREIGN KEY REFERENCES PaymentsUsers(UserId) NOT NULL,
 Validity DATE NOT NULL,
 Bank NVARCHAR(20) NOT NULL)
@@ -34,10 +35,13 @@ create table Payments
 PaymentCard INT FOREIGN KEY REFERENCES Cards(CardID) NOT NULL,
 PaymentDate DATE NOT NULL,
 UserName INT FOREIGN KEY REFERENCES PaymentsUsers(UserId) NOT NULL,
-StatusInfo INT FOREIGN KEY REFERENCES PaymentsStatus(StatusID) NOT NULL)
+StatusInfo INT FOREIGN KEY REFERENCES PaymentsStatus(StatusID) NOT NULL,
+PaymentAmount MONEY NOT NULL)
+
 --ограничени€ по картам и пользовател€м
 alter table Cards
-ADD CONSTRAINT UQ_Cards UNIQUE (Number)
+ADD CONSTRAINT UQ_Cards UNIQUE (CardNumber)
+alter table Cards
 ADD CONSTRAINT CH_Date CHECK( Validity > CAST(GETDATE() as DATE)) 
 
 alter table PaymentsUsers
