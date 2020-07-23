@@ -52,6 +52,7 @@ from Sales.Invoices as i
 join Sales.InvoiceLines as il on i.InvoiceID=il.InvoiceID
 join Warehouse.StockItems as si on il.StockItemID=si.StockItemID
 group by rollup (year(i.InvoiceDate), month(i.InvoiceDate), si.StockItemName)
+having sum(il.Quantity)<50
 -----------------------------------------------------------------------------------------------------------------
 
 /*4. Написать рекурсивный CTE sql запрос и заполнить им временную таблицу и табличную переменную
@@ -90,19 +91,31 @@ EmployeeID Name Title EmployeeLevel
 286 | | | Lynn Tsoflias Sales Representative 4
 */
 -----------------------------------------------------------------------------------------------------------------
-
----------создание исходной таблицы
--------------CTE для переноса данных
-with CTE_Employees as
-(select	EmployeeID,
+--------------создание временной таблицы
+CREATE TABLE #HWEmployees
+(EmployeeID smallint NOT NULL,
+Name nvarchar(40) NOT NULL,
+Title nvarchar(50) NOT NULL,
+EmployeeLevel smallint NOT NULL);
+------------создание cte
+WITH CTE_Employees AS
+ (select	EmployeeID,
 			case
 			when DeptID=2 then '|'
 			when DeptID=3 then '||'
 			when DeptID=4 then '|||'
 			else ' '
-			end as Part,
-		FirstName,
-		LastName,
+			end
+			+ ' ' + + FirstName + ' ' + LastName as Name,
 		Title,
-		DeptID
+		DeptID as EmployeeLevel
 from MyEmployees)
+
+---------вношу во временную таблицу
+INSERT INTO #HWEmployees
+SELECT EmployeeID, Name, Title, EmployeeLevel
+FROM CTE_Employees
+
+select * from #HWEmployees
+
+
