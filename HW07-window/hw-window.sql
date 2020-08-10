@@ -104,17 +104,19 @@ from Warehouse.StockItems
 В результатах должны быть ид и фамилия сотрудника, ид и название клиента, дата продажи, сумму сделки*/
 -----------------------------------с помощью cross apply
 ---------6019 мс мс без оконной ф-и, и 181 мс с ней, так же большая разница в пользу оконной ф-и
-select	tt.SalespersonPersonID
+select distinct
+		tt.SalespersonPersonID
 		,p.FullName as SalesPersonName
 		,t.CustomerID
 		,t.CustomerName
-		,tt.OrderDate
+		,t.OrderDate
 		,t.Total
 from Sales.Orders as tt 
 cross apply
 (select top(1)
 o.CustomerID
 ,c.CustomerName as CustomerName
+,o.OrderDate
 ,ol.Quantity*ol.UnitPrice as Total
 from Sales.Orders as o
 			join Sales.OrderLines as ol on o.OrderID=ol.OrderID
@@ -122,7 +124,7 @@ from Sales.Orders as o
 where tt.SalespersonPersonID=o.SalespersonPersonID
 order by tt.OrderDate asc) as t
 join Application.People as p on  tt.SalespersonPersonID=p.PersonID
-order by tt.OrderDate asc
+order by tt.SalespersonPersonID asc
 ----------------------------------- с оконной функцией
 select * from (
 			select	o.SalespersonPersonID,
@@ -130,7 +132,7 @@ select * from (
 			o.CustomerID,
 			c.CustomerName as CustomerName,
 			o.OrderDate,
-			ol.Quantity*ol.UnitPrice as SumPrice,
+			ol.Quantity*ol.UnitPrice as Total,
 				row_number() OVER (partition by o.SalespersonPersonID order by o.OrderDate asc) AS lastsales
 			from Sales.Orders as o
 			join Sales.OrderLines as ol on o.OrderID=ol.OrderID
