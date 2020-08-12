@@ -12,15 +12,21 @@ InvoiceMonth Peeples Valley, AZ Medicine Lodge, KS Gasport, NY Sylvanite, MT Jes
 01.01.2013 3 1 4 2 2
 01.02.2013 7 3 4 2 1*/
 ------------------------------------------------------------------------------------------------------------
---select	c.CustomerID,
---		c.CustomerName,
---		o.OrderID,
---		o.OrderDate,
---		month(o.OrderDate) as mnth
---from Sales.Customers as c
---join Sales.Orders as o on c.CustomerID=o.CustomerID
---where c.CustomerID between 2 and 6
---pivot(count(orderID) for <customername>
+WITH cte_Customers as (
+SELECT  TRIM(REPLACE(REPLACE(REPLACE(cust.CustomerName, 'Tailspin Toys', ''), '(',''), ')', '')) Customer,
+		CONVERT(nvarchar, DATEFROMPARTS(YEAR(inv.InvoiceDate), MONTH(inv.InvoiceDate), 1 ), 104) as PurchaseMonth,
+		COUNT(*) as QuantityPurchases
+FROM Sales.Customers cust
+	INNER JOIN Sales.Invoices AS inv
+		ON inv.CustomerID = cust.CustomerID
+WHERE cust.CustomerID between 2 and 6
+GROUP BY cust.CustomerName, DATEFROMPARTS(YEAR(inv.InvoiceDate), MONTH(inv.InvoiceDate), 1 ))
+
+SELECT *
+FROM cte_Customers
+PIVOT (SUM(QuantityPurchases)
+	FOR Customer IN ([Gasport, NY], [Jessie, ND], [Medicine Lodge, KS], [Peeples Valley, AZ], [Sylvanite, MT])) as PVT
+ORDER BY PurchaseMonth
 
 /*2. Для всех клиентов с именем, в котором есть Tailspin Toys
 вывести все адреса, которые есть в таблице, в одной колонке
@@ -90,4 +96,4 @@ order by t.CustomerID asc
 Что делает запрос?
 Чем можно заменить CROSS APPLY - можно ли использовать другую стратегию выборки\запроса?*/ 
 предполагаю, что выборка последней версии файла в папке, которого нет в удаленных или восстановленных файлах
-cross apply заменить на оконную ф-ю с row_number() по условию V.DirVersionId DESC?
+cross apply заменить на оконную ф-ю с top 1 row_number() по условию V.DirVersionId DESC
