@@ -37,17 +37,13 @@ Tailspin Toys (Head Office) 1877 Mittal Road
 Tailspin Toys (Head Office) PO Box 8975
 Tailspin Toys (Head Office) Ribeiroville*/
 
-select c.CustomerName, t.*
-from Sales.Customers as c
-cross apply
-(select DeliveryAddressLine1 as Adress
+select*from
+(	select	CustomerName,
+			DeliveryAddressLine1,
+			DeliveryAddressLine2
 	from Sales.Customers
-union
-select DeliveryAddressLine2
-from Sales.Customers
-	where CustomerID=c.CustomerID) as t
-where c.CustomerName like 'Tailspin Toys%'
-order by c.CustomerName asc, Adress asc
+	where CustomerName like 'Tailspin Toys%') as adresses
+UNPIVOT (Adress FOR Name IN(DeliveryAddressLine1,DeliveryAddressLine2))as unpvt
 -------------------------------------------------------------------
 /*3. В таблице стран есть поля с кодом страны цифровым и буквенным
 сделайте выборку ИД страны, название, код - чтобы в поле был либо цифровой либо буквенный код
@@ -57,17 +53,14 @@ CountryId CountryName Code
 1 Afghanistan 4
 3 Albania ALB
 3 Albania 8*/
-select	c.CountryID,
-		c.CountryName, t.*
-from Application.Countries as c
-cross apply
-(select IsoAlpha3Code as Code
-	from Application.Countries
-union
-select CAST(IsoNumericCode as nvarchar(3))
-from Application.Countries
-	where CountryID=c.CountryID) as t
-order by c.CountryID
+select*from
+(	select	CountryID,
+			CountryName,
+			IsoAlpha3Code,
+			CAST(IsoNumericCode as nvarchar(3)) as NumericCode
+	from Application.Countries) as country
+UNPIVOT (Code FOR Name IN(IsoAlpha3Code,NumericCode))as unpvt
+
 -------------------------------------------------------------------
 /*4. Перепишите ДЗ из оконных функций через CROSS APPLY
 Выберите по каждому клиенту 2 самых дорогих товара, которые он покупал
