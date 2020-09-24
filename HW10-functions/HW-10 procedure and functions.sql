@@ -59,18 +59,18 @@ EXEC PR_customersalessum 10
 
 /*4) Создайте табличную функцию покажите как ее можно вызвать для каждой строки result set'а без использования цикла.*/
 
-create function dbo.fn_tableTotalPrice()
-returns @PriceTable table (CustomerName nvarchar(100),TotalPrice decimal)
-as
-begin
-		insert @PriceTable
-		select 	c.CustomerName as CustomerName,
-			sum(il.Quantity*il.UnitPrice) as TotalPrice
-			from Sales.Customers as c
+create function dbo.fn_totalsales (@CustomerID int)  
+returns table  
+AS  
+return   
+(		select sum(il.Quantity*il.UnitPrice) as total
+		from Sales.Customers as c
 			join Sales.Invoices as i on c.CustomerID=i.CustomerID
 			join Sales.InvoiceLines as il on i.InvoiceID=il.InvoiceID
-			group by c.CustomerName
-		return
-end
+		where c.CustomerID = @CustomerID
+)
 
-SELECT * FROM dbo.fn_TotalPrice()
+SELECT c.CustomerID, fnTotal.total as TotalSUM
+from Sales.Customers as c
+CROSS APPLY dbo.fn_totalsales(c.CustomerID) AS fnTotal
+order by  c.CustomerID desc
