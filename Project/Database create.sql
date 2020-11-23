@@ -29,7 +29,14 @@ PaymentCard INT FOREIGN KEY REFERENCES Cards(CardID) NOT NULL,
 PaymentDate DATE NOT NULL,
 UserName INT FOREIGN KEY REFERENCES PaymentsUsers(UserId) NOT NULL,
 StatusInfo INT FOREIGN KEY REFERENCES PaymentsStatus(StatusID) NOT NULL,
+PaymentDate DATE DEFAULT GETDATE() NOT NULL,
 PaymentAmount MONEY NOT NULL)
+
+--таблица с выведенными на проверку платежами
+create table CheckPayments
+(CheckPayID INT IDENTITY PRIMARY KEY NOT NULL,
+PaymentID INT FOREIGN KEY REFERENCES Payments(PaymentID) NOT NULL,
+CheckPayRule NVARCHAR(30) NOT NULL)
 
 --ограничения по картам и пользователям
 alter table Cards
