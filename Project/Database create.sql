@@ -26,10 +26,9 @@ ErrorDescription NVARCHAR(30) )
 create table Payments
 (PaymentID INT IDENTITY PRIMARY KEY NOT NULL,
 PaymentCard INT FOREIGN KEY REFERENCES Cards(CardID) NOT NULL,
-PaymentDate DATE NOT NULL,
 UserName INT FOREIGN KEY REFERENCES PaymentsUsers(UserId) NOT NULL,
 StatusInfo INT FOREIGN KEY REFERENCES PaymentsStatus(StatusID) NOT NULL,
-PaymentDate DATE DEFAULT GETDATE() NOT NULL,
+PaymentDate DATETIME DEFAULT GETDATE() NOT NULL,
 PaymentAmount MONEY NOT NULL)
 
 --таблица с выведенными на проверку платежами
